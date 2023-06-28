@@ -3,12 +3,29 @@
   hosts: localhost
   gather_facts: false
   tasks:
+  # Build the image & push to docker registry
     - name: Build a docker image
       command: docker build -t srilakshmidoma1/helloworld:v1 .
 
     - name: Push a docker image to docker registry
       command: docker push srilakshmidoma1/helloworld:v1
 
+  # Test if the k8s manifest files exists or not
+    - name: Test if k8s manifest files exists
+      stat:
+        path: "{{ item }}"
+      register: file_status
+      with_items:
+        - deploy/deployment.yml
+        - deploy/service.yml
+        - deploy/ingress.yml
+
+    - name: Print the result
+      debug:
+        msg: "File {{ item.item }} exists: {{ item.stat.exists }}"
+      with_items: "{{ file_status.results }}"
+
+    # Start the minikube, create tls certs and create secrets
     - name: Start Minikube
       command: minikube start
 
@@ -18,12 +35,14 @@
     - name: Create a secret
       command: kubectl create secret tls hello-world-com-tls --cert=hello.crt --key=hello.key -n demo
 
+    # Enable ingress on minikube
     - name: Enable ingress addon
       command: minikube addons enable ingress
 
     - name: Enable ingress-dns
       command: minikube addons enable ingress-dns
 
+    # Deploy the application
     - name: Create a deployment
       command: kubectl apply -f deploy/deployment.yml
 
