@@ -25,7 +25,7 @@
         msg: "File {{ item.item }} exists: {{ item.stat.exists }}"
       with_items: "{{ file_status.results }}"
 
-    # Start the minikube, create tls certs and create secrets
+    # Start the minikube, create tls certs and secret
     - name: Start Minikube
       command: minikube start
 
