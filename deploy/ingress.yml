@@ -1,0 +1,28 @@
+#create crts using 
+#openssl req -x509 -newkey rsa:4096 -sha256 -nodes -keyout tls.key -out tls.crt -subj "/CN=hello-world.com" -days 365
+#kubectl create secret tls hello-world-com-tls --cert=tls.crt --key=tls.key -n demo
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: demo
+  name: hello-world
+  labels:
+    app: hello-world
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+    - secretName: hello-world-com-tls
+      hosts:
+        - hello-world.com
+  rules:
+  - host: hello-world.com
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: hello-world
+              port:
+                number: 8080

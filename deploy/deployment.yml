@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: demo
+  name: hello-world
+  labels:
+    app: hello-world
+spec:
+  selector:
+    matchLabels:
+      app: hello-world
+  replicas: 2
+  template:
+    metadata:
+      name: hello-world
+      labels:
+        app: hello-world
+    spec:
+      containers:
+      - name: app
+        image: srilakshmidoma1/helloworld:v1
+        resources:
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+          requests:
+            cpu: "0.5"
+            memory: "200Mi"
+        ports:
+        - containerPort: 80
+          

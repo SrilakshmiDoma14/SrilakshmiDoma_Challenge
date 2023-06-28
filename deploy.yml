@@ -1,0 +1,31 @@
+---
+- name: Deploy Nginx on Minikube
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Build a docker image
+      command: docker build -t srilakshmidoma1/helloworld:v1 .
+
+    - name: Push a docker image to docker registry
+      command: docker push srilakshmidoma1/helloworld:v1
+
+    - name: Start Minikube
+      command: minikube start
+
+    - name: Create a openssl cert
+      command: openssl req -x509 -newkey rsa:4096 -sha256 -nodes -keyout hello.key -out hello.crt -subj "/CN=hello-world.com" -days 365
+
+    - name: Create a secret
+      command: kubectl create secret tls hello-world-com-tls --cert=hello.crt --key=hello.key -n demo
+
+    - name: Enable ingress addon
+      command: minikube addons enable ingress
+
+    - name: Enable ingress-dns
+      command: minikube addons enable ingress-dns
+
+    - name: Create a deployment
+      command: kubectl apply -f deploy/deployment.yml
+
+    - name: Create a service
+      command: kubectl apply -f deploy/service.yml
